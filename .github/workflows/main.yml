@@ -1,0 +1,51 @@
+name: Development build
+
+on:
+  push:
+    branches:
+      - main
+      - develop/*
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BRANCH_NAME: ${{ github.ref_name }}
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=512m'"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Setup
+        uses: damontecres/wholphin/.github/actions/setup@main
+      - name: Get libmpv dependencies
+        shell: bash
+        run: |
+          cd wholphin-mpv/src/native
+          ./get_dependencies.sh
+      - name: Build libmpv
+        shell: bash
+        run: |
+          cd wholphin-mpv/src/native
+          ./buildall.sh --clean --arch arm64 mpv
+          ./buildall.sh mpv
+
+      - name: Build aar
+        shell: bash
+        run: |
+          ./gradlew assembleRelease assembleDebug --no-daemon
+      - name: Upload aar
+        uses: actions/upload-artifact@v7
+        with:
+          name: AAB
+          path: |
+            wholphin-mpv/build/outputs/aar/*.aar
+          compression-level: 0
