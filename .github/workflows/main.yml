@@ -2,6 +2,8 @@ name: Development build
 
 on:
   push:
+    tags:
+      - v*
     branches:
       - main
       - develop/*
@@ -34,7 +36,6 @@ jobs:
 
       - name: Load media3 module cache
         id: cache_media3_module
-        if: ${{ inputs.cache }}
         uses: actions/cache/restore@v5
         with:
           path: |
@@ -66,7 +67,7 @@ jobs:
         run: |
           ./wholphin-media3/build_decoders.sh "${{ env.ANDROID_SDK_ROOT }}/ndk/${{ env.NDK_VERSION }}"
       - name: Publish media3 decoder
-        if: steps.cache_media3_module.outputs.cache-hit != 'true'
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         run: |
           ./wholphin-media3/publish.sh
@@ -99,11 +100,12 @@ jobs:
       - name: Build aar
         shell: bash
         run: |
-          ./gradlew assembleRelease assembleDebug --no-daemon
+          ./gradlew assembleRelease assembleDebug
       - name: Publish aar
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         run: |
-          ./gradlew publish --no-daemon
+          ./gradlew publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload aar
@@ -111,6 +113,7 @@ jobs:
         with:
           name: wholphin-mpv-aar
           path: |
+            wholphin-media3/libs/*.aar
             wholphin-mpv/build/outputs/aar/*.aar
           compression-level: 0
       - name: Save libmpv module cache

@@ -7,4 +7,3 @@ androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", versi
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
-android-fusedlibrary = { id = "com.android.fused-library", version.ref = "agp" }
