@@ -24,6 +24,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout the code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Need the tags to build
       - name: Setup
         uses: damontecres/wholphin/.github/actions/setup@main
       - name: Get libmpv dependencies
