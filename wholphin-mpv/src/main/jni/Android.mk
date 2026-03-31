@@ -1,10 +1,10 @@
 LOCAL_PATH:= $(call my-dir)
 
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
-PREFIX = armv7l
+PREFIX = $(LOCAL_PATH)/../../../build/libmpv/prefix/armv7l
 endif
 ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
-PREFIX = arm64
+PREFIX = $(LOCAL_PATH)/../../../build/libmpv/prefix/arm64
 endif
 # ifeq ($(TARGET_ARCH_ABI),x86_64)
 # PREFIX = $(PREFIX_X64)
@@ -15,12 +15,12 @@ endif
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libswresample
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libpostproc
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 # only include if library file exists
 ifneq (,$(wildcard $(LOCAL_SRC_FILES)))
 include $(PREBUILT_SHARED_LIBRARY)
@@ -28,44 +28,44 @@ endif
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libavutil
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libavcodec
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libavformat
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libswscale
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libavfilter
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libavdevice
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 # LOCAL_EXPORT_C_INCLUDES := $(PREFIX)/include
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libmpv
-LOCAL_SRC_FILES := $(LOCAL_PATH)/../libs/$(TARGET_ARCH_ABI)/libmpv.so
+LOCAL_SRC_FILES := $(PREFIX)/lib/libmpv.so
 # LOCAL_EXPORT_C_INCLUDES := $(PREFIX)/include
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../build/libmpv/prefix/$(PREFIX)/include/
+LOCAL_C_INCLUDES := $(PREFIX)/include/
 LOCAL_MODULE    := libplayer
 LOCAL_CFLAGS    := -Werror
 LOCAL_CPPFLAGS  += -std=c++11

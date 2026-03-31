@@ -18,5 +18,5 @@ PATH="$PATH:$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin" ./buildall.sh 
 PATH="$PATH:$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin" ./buildall.sh mpv
 
 cd ../../..
-env PREFIX32="$(realpath wholphin-mpv/build/libmpv/prefix/armv7l)" PREFIX64="$(realpath wholphin-mpv/build/libmpv/prefix/arm64)" "$NDK_PATH/ndk-build" -C wholphin-mpv/src/main -j && cp -fr wholphin-mpv/src/main/libs/ wholphin-mpv/src/main/jnilibs/
+./gradlew build
 ```
