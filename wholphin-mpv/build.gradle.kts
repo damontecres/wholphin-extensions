@@ -18,7 +18,7 @@ android {
     defaultConfig {
         minSdk = 23
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        ndk{
+        ndk {
             abiFilters += "armeabi-v7a"
             abiFilters += "arm64-v8a"
         }
@@ -49,7 +49,7 @@ android {
             path = File("src/main/jni/Android.mk")
         }
     }
-    publishing{
+    publishing {
         singleVariant("release") {
             withSourcesJar()
         }
@@ -58,7 +58,7 @@ android {
 
 val gitDescribe: String =
     providers
-        .exec { commandLine("git", "describe", "--tags", "--long", "--match=v*") }
+        .exec { commandLine("git", "describe", "--tags", "--abbrev=0") }
         .standardOutput.asText
         .getOrElse("v0.0.0")
         .trim()
@@ -76,7 +76,7 @@ publishing {
             }
         }
     }
-    repositories{
+    repositories {
         maven {
             name = "GitHubPackages"
             url = URI("https://maven.pkg.github.com/damontecres/wholphin-extensions")

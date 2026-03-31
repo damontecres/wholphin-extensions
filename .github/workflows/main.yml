@@ -32,6 +32,14 @@ jobs:
       - name: Setup
         uses: damontecres/wholphin/.github/actions/setup@main
 
+      - name: Load media3 module cache
+        id: cache_media3_module
+        if: ${{ inputs.cache }}
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            wholphin-media3/libs
+          key: ${{ runner.os }}-media3-${{ hashFiles('**/libs.versions.toml', '**/wholphin-media3/build_decoders.sh') }}
       - name: Load libmpv module cache
         id: cache_libmpv_module
         # if: ${{ inputs.cache }}
@@ -42,7 +50,7 @@ jobs:
           key: ${{ runner.os }}-libmpv-${{ hashFiles('**/wholphin-mpv/src/native/**/*.sh') }}
 
       - name: Install dependencies
-        if: steps.cache_libmpv_module.outputs.cache-hit != 'true'
+        if: steps.cache_media3_module.outputs.cache-hit != 'true' || steps.cache_libmpv_module.outputs.cache-hit != 'true'
         shell: bash
         run: |
           python -m pip install --upgrade pip
@@ -50,6 +58,30 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential autoconf pkg-config libtool ninja-build unzip wget meson nasm
 
+      # media3
+      - name: Build media3 decoders
+        id: media3-decoder
+        if: steps.cache_media3_module.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          ./wholphin-media3/build_decoders.sh "${{ env.ANDROID_SDK_ROOT }}/ndk/${{ env.NDK_VERSION }}"
+      - name: Publish media3 decoder
+        if: steps.cache_media3_module.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          ./wholphin-media3/publish.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save media3 module cache
+        id: cache_media3_module_save
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            wholphin-media3/libs
+          key: ${{ steps.cache_media3_module.outputs.cache-primary-key }}
+
+      # MPV
       - name: Get libmpv dependencies
         if: steps.cache_libmpv_module.outputs.cache-hit != 'true'
         shell: bash

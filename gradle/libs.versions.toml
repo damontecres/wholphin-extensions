@@ -1,7 +1,10 @@
 [versions]
 agp = "9.0.1"
+androidx-media3 = "1.10.0"
 
 [libraries]
+androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "androidx-media3" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-fusedlibrary = { id = "com.android.fused-library", version.ref = "agp" }

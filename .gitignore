@@ -18,3 +18,5 @@ local.properties
 /wholphin-mpv/src/main/libs/
 /wholphin-mpv/src/main/jnilibs/
 /wholphin-mpv/src/main/obj/
+/wholphin-media3/libs/
+ffmpeg_decoder/
