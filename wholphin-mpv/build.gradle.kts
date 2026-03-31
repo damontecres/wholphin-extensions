@@ -61,6 +61,7 @@ val gitDescribe: String =
         .exec { commandLine("git", "describe", "--tags", "--long", "--match=v*") }
         .standardOutput.asText
         .getOrElse("v0.0.0")
+        .trim()
         .removePrefix("v")
 
 publishing {
