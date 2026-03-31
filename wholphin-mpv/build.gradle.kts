@@ -45,9 +45,6 @@ android {
     externalNativeBuild {
         ndkBuild {
             path = File("src/main/jni/Android.mk")
-            // Optional: pass arguments, flags, or target specific libraries
-            // arguments "NDK_LOG=1"
-            // targets "my-native-lib"
         }
     }
 }
