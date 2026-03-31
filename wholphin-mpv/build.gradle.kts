@@ -1,7 +1,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import java.net.URI
 
 plugins {
     alias(libs.plugins.android.library)
+    id("maven-publish")
 }
 
 android {
@@ -33,11 +36,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-        isCoreLibraryDesugaringEnabled = true
     }
     kotlin {
         compilerOptions {
-            languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
+            languageVersion = KotlinVersion.KOTLIN_2_3
             jvmTarget = JvmTarget.JVM_11
             javaParameters = true
         }
@@ -47,14 +49,45 @@ android {
             path = File("src/main/jni/Android.mk")
         }
     }
+    publishing{
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
+val gitDescribe: String =
+    providers
+        .exec { commandLine("git", "describe", "--tags", "--long", "--match=v*") }
+        .standardOutput.asText
+        .getOrElse("v0.0.0")
+        .removePrefix("v")
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.github.damontecres.wholphin.mpv"
+            artifactId = "wholphin-mpv"
+            version = gitDescribe
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
+    repositories{
+        maven {
+            name = "GitHubPackages"
+            url = URI("https://maven.pkg.github.com/damontecres/wholphin-extensions")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+
+
 dependencies {
-    implementation(libs.androidx.media3.exoplayer)
 
-    coreLibraryDesugaring(libs.desugar.jdk.libs)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

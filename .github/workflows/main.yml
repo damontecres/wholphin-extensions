@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
     steps:
       - name: Checkout the code
         uses: actions/checkout@v6
@@ -67,6 +68,12 @@ jobs:
         shell: bash
         run: |
           ./gradlew assembleRelease assembleDebug --no-daemon
+      - name: Publish aar
+        shell: bash
+        run: |
+          ./gradlew publish --no-daemon
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload aar
         uses: actions/upload-artifact@v7
         with:
