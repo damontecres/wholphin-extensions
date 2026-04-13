@@ -20,3 +20,4 @@ local.properties
 /wholphin-mpv/src/main/obj/
 /wholphin-media3/libs/
 ffmpeg_decoder/
+*.pom.xml
