@@ -9,7 +9,6 @@ SETTINGS_FILE="${PROJECT_ROOT}/wholphin-media3/mvn_settings.xml"
 
 media3_version="$(grep "androidx-media3 = " "$PROJECT_ROOT/gradle/libs.versions.toml" | awk -F'"' '{print $2}')"
 
-
 version="$(git describe --tags --abbrev=0)"
 version=${version#v}
 
