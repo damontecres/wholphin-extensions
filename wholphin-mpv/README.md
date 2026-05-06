@@ -5,7 +5,7 @@ This scripts are adapted from https://github.com/mpv-android/mpv-android/tree/ae
 ## Instructions
 
 ```bash
-cd scripts/mpv
+cd wholphin-mpv/src/native
 ./get_dependencies.sh
 
 # Install build dependencies
@@ -17,6 +17,6 @@ PATH="$PATH:$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin" ./buildall.sh 
 # Build arm32
 PATH="$PATH:$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin" ./buildall.sh mpv
 
-cd ../../..
+cd ../.. # ie $PROJECT_ROOT/wholphin-mpv
 ./gradlew build
 ```
