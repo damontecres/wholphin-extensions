@@ -10,9 +10,10 @@ plugins {
 android {
     namespace = "com.github.damontecres.wholphin.mpv"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version =
+            release(36) {
+                minorApiLevel = 1
+            }
     }
     ndkVersion = "29.0.14206865"
     defaultConfig {
@@ -29,7 +30,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -88,7 +89,5 @@ publishing {
     }
 }
 
-
 dependencies {
-
 }
