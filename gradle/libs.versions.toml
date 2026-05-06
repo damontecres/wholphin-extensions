@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.1"
+agp = "9.1.1"
 androidx-media3 = "1.10.0"
 
 [libraries]
