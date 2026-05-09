@@ -40,4 +40,4 @@ Builds the decoder extension modules for `ExoPlayer` which supports extra codecs
 
 Builds `libmpv` for use as an alternative playback engine.
 
-This does not include any of the Kotlin code.
+Includes a `androidx.media3.common.Player` implementation that handles most functionality.
