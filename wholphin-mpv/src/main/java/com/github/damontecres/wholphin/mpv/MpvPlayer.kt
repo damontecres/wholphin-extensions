@@ -159,8 +159,8 @@ class MpvPlayer(
                     COMMAND_GET_TRACKS,
 //                    COMMAND_GET_AUDIO_ATTRIBUTES,
 //                    COMMAND_SET_AUDIO_ATTRIBUTES,
-//                    COMMAND_GET_VOLUME,
-//                    COMMAND_SET_VOLUME,
+                    COMMAND_GET_VOLUME,
+                    COMMAND_SET_VOLUME,
                     COMMAND_SET_VIDEO_SURFACE,
 //                    COMMAND_GET_TEXT,
                     COMMAND_RELEASE,
@@ -442,9 +442,11 @@ class MpvPlayer(
 
     override fun getAudioAttributes(): AudioAttributes = throw UnsupportedOperationException()
 
-    override fun setVolume(volume: Float): Unit = throw UnsupportedOperationException()
+    override fun setVolume(volume: Float) {
+        sendCommand(MpvCommand.VOLUME, volume)
+    }
 
-    override fun getVolume(): Float = 1f
+    override fun getVolume(): Float = playbackState.load().volume
 
     override fun mute() {
         volume = 0f
@@ -1057,6 +1059,14 @@ class MpvPlayer(
                 }
             }
 
+            MpvCommand.VOLUME -> {
+                val value = obj as Float
+                MPVLib.setPropertyInt("volume", (value * 100).toInt().coerceIn(0, 100))
+                playbackState.update {
+                    it.copy(volume = value)
+                }
+            }
+
             MpvCommand.LOAD_FILE -> {
                 loadFile(obj as MediaAndPosition)
             }
@@ -1179,6 +1189,7 @@ private data class PlaybackState(
     val durationMs: Long,
     val isPaused: Boolean,
     val speed: Float,
+    val volume: Float,
     val subtitleDelay: Double,
     val videoSize: VideoSize,
     @param:Player.State val state: Int,
@@ -1197,6 +1208,7 @@ private data class PlaybackState(
                 bufferMs = C.TIME_UNSET,
                 isPaused = false,
                 speed = 1f,
+                volume = 1f,
                 videoSize = VideoSize.UNKNOWN,
                 state = Player.STATE_IDLE,
                 subtitleDelay = 0.0,
@@ -1224,6 +1236,7 @@ enum class MpvCommand(
     SET_SPEED(false),
     SET_SUBTITLE_DELAY(false),
     LOAD_FILE(false),
+    VOLUME(false),
     ATTACH_SURFACE(true),
     INITIALIZE(true),
     DESTROY(true),
