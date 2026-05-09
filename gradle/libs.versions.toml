@@ -1,9 +1,15 @@
 [versions]
 agp = "9.1.1"
 androidx-media3 = "1.10.0"
+kotlin = "2.3.21"
+timber = "5.0.1"
+desugar_jdk_libs = "2.1.5"
 
 [libraries]
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "androidx-media3" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
