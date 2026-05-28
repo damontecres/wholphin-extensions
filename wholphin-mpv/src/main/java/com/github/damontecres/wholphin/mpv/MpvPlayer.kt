@@ -166,6 +166,10 @@ class MpvPlayer(
                     COMMAND_RELEASE,
                 ).build()
         trackSelector.init(this, DefaultBandwidthMeter.getSingletonInstance(context))
+
+        notifyListeners(EVENT_AVAILABLE_COMMANDS_CHANGED) {
+            onAvailableCommandsChanged(availableCommands)
+        }
     }
 
     override fun getApplicationLooper(): Looper = looper
