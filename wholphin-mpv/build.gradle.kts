@@ -22,6 +22,7 @@ android {
         ndk {
             abiFilters += "armeabi-v7a"
             abiFilters += "arm64-v8a"
+            abiFilters += "x86_64"
         }
     }
 
