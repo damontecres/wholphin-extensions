@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "wholphin-extensions"
 include(":wholphin-mpv")
+include(":testapp")
