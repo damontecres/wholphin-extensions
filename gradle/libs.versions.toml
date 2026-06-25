@@ -1,6 +1,6 @@
 [versions]
 agp = "9.1.1"
-androidx-media3 = "1.10.0"
+androidx-media3 = "1.10.1"
 kotlin = "2.3.21"
 timber = "5.0.1"
 desugar_jdk_libs = "2.1.5"
