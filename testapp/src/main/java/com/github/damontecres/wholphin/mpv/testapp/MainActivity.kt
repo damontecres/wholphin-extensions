@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -41,6 +43,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_SURFACE_VIEW
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
+import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPresentationState
 import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -116,8 +119,10 @@ fun Playback(
     val context = LocalContext.current
     val player = remember { MpvPlayer(context, false, false) }
     val presentationState = rememberPresentationState(player, false)
-    var playerSize by remember { mutableFloatStateOf(.99f) }
+    var playerSize by remember { mutableFloatStateOf(1f) }
+    val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
         player.addListener(
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
@@ -136,9 +141,8 @@ fun Playback(
             }
         player.setMediaItems(mediaItems, 0, 0)
         player.play()
-        delay(1000)
-        playerSize = 1f
     }
+    val playPauseState = rememberPlayPauseButtonState(player)
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -158,6 +162,18 @@ fun Playback(
                         .background(Color.Black),
             ) {
                 Text(text = "Cover Surface", color = Color.White)
+            }
+        }
+        Row(
+            modifier = Modifier.align(Alignment.BottomCenter),
+        ) {
+            Button(
+                onClick = playPauseState::onClick,
+                enabled = playPauseState.isEnabled,
+                modifier = Modifier.focusRequester(focusRequester),
+            ) {
+                val text = if (playPauseState.showPlay) "Play" else "Pause"
+                Text(text)
             }
         }
     }
