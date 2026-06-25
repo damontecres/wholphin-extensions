@@ -166,6 +166,10 @@ class MpvPlayer(
                     COMMAND_RELEASE,
                 ).build()
         trackSelector.init(this, DefaultBandwidthMeter.getSingletonInstance(context))
+
+        notifyListeners(EVENT_AVAILABLE_COMMANDS_CHANGED) {
+            onAvailableCommandsChanged(availableCommands)
+        }
     }
 
     override fun getApplicationLooper(): Looper = looper
@@ -620,6 +624,15 @@ class MpvPlayer(
                 }
                 notifyListeners(EVENT_IS_PLAYING_CHANGED) { onIsPlayingChanged(!value) }
             }
+
+            MPVProperty.PAUSED_FOR_CACHE -> {
+                Timber.v("paused-for-cache %s", value)
+                val newState = if (value) STATE_BUFFERING else STATE_READY
+                playbackState.update {
+                    it.copy(state = newState)
+                }
+                notifyListeners(EVENT_PLAYBACK_STATE_CHANGED) { onPlaybackStateChanged(newState) }
+            }
         }
     }
 
@@ -827,6 +840,7 @@ class MpvPlayer(
             )
         }
         notifyListeners(EVENT_IS_LOADING_CHANGED) { onIsLoadingChanged(true) }
+        notifyListeners(EVENT_PLAYBACK_STATE_CHANGED) { onPlaybackStateChanged(STATE_READY) }
         val url =
             media.mediaItem.localConfiguration
                 ?.uri
