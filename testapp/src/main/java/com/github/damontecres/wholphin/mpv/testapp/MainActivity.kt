@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,10 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -47,6 +53,7 @@ import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPresentationState
 import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
@@ -54,12 +61,17 @@ import androidx.tv.material3.surfaceColorAtElevation
 import com.github.damontecres.wholphin.mpv.MpvPlayer
 import com.github.damontecres.wholphin.mpv.testapp.ui.theme.WholphinextensionsTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import timber.log.Timber
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalTvMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Can use launch flags: -e url <url>
+        val url = intent.getStringExtra("url") ?: ""
         Timber.plant(Timber.DebugTree())
         setContent {
             WholphinextensionsTheme(true) {
@@ -67,7 +79,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     shape = RectangleShape,
                 ) {
-                    var input by remember { mutableStateOf("") }
+                    var input by remember { mutableStateOf(url) }
                     var submit by remember { mutableStateOf(false) }
                     if (submit) {
                         val urls = remember(input) { input.lines() }
@@ -99,6 +111,7 @@ fun InputUrls(
             onValueChange = onTextChange,
             textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
             maxLines = 4,
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
             modifier =
                 Modifier
                     .size(400.dp, 300.dp)
@@ -135,7 +148,7 @@ fun Playback(
             urls.map {
                 MediaItem
                     .Builder()
-                    .setUri(it)
+                    .setUri(it.trim())
                     .setMediaId(it)
                     .build()
             }
@@ -164,16 +177,61 @@ fun Playback(
                 Text(text = "Cover Surface", color = Color.White)
             }
         }
-        Row(
-            modifier = Modifier.align(Alignment.BottomCenter),
+        Box(
+            modifier =
+                Modifier
+                    .padding(8.dp)
+                    .fillMaxSize(),
         ) {
-            Button(
-                onClick = playPauseState::onClick,
-                enabled = playPauseState.isEnabled,
-                modifier = Modifier.focusRequester(focusRequester),
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.align(Alignment.BottomCenter),
             ) {
-                val text = if (playPauseState.showPlay) "Play" else "Pause"
-                Text(text)
+                Button(
+                    onClick = { player.seekBack() },
+                    enabled = playPauseState.isEnabled,
+                    modifier = Modifier.focusRequester(focusRequester),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.scale(scaleX = -1f, scaleY = 1f),
+                    )
+                }
+                Button(
+                    onClick = playPauseState::onClick,
+                    enabled = playPauseState.isEnabled,
+                    modifier = Modifier.focusRequester(focusRequester),
+                ) {
+                    val text = if (playPauseState.showPlay) "Play" else "Pause"
+                    Text(text)
+                }
+                Button(
+                    onClick = { player.seekForward() },
+                    enabled = playPauseState.isEnabled,
+                    modifier = Modifier.focusRequester(focusRequester),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.scale(scaleX = 1f, scaleY = 1f),
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier.align(Alignment.BottomEnd),
+            ) {
+                var duration by remember { mutableStateOf(Duration.ZERO) }
+                var position by remember { mutableStateOf(Duration.ZERO) }
+                LaunchedEffect(Unit) {
+                    while (isActive) {
+                        duration = player.duration.milliseconds
+                        position = player.currentPosition.milliseconds
+                        delay(500.milliseconds)
+                    }
+                }
+                Text("$position / $duration")
             }
         }
     }
