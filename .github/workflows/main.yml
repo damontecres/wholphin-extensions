@@ -49,7 +49,7 @@ jobs:
         with:
           path: |
             wholphin-mpv/build/libmpv/prefix
-          key: ${{ runner.os }}-libmpv-${{ hashFiles('**/wholphin-mpv/src/native/**/*.sh') }}
+          key: ${{ runner.os }}-libmpv-${{ hashFiles('**/wholphin-mpv/src/native/**/*.sh', '**/.github/workflows/*.yml') }}
 
       - name: Install dependencies
         if: steps.cache_media3_module.outputs.cache-hit != 'true' || steps.cache_libmpv_module.outputs.cache-hit != 'true'
@@ -96,7 +96,8 @@ jobs:
         run: |
           cd wholphin-mpv/src/native
           ./buildall.sh --clean --arch arm64 mpv
-          ./buildall.sh mpv
+          ./buildall.sh --arch armv7l mpv
+          ./buildall.sh --arch x86_64 mpv
 
       - name: Build aar
         shell: bash

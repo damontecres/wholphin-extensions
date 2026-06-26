@@ -6,9 +6,9 @@ endif
 ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
 PREFIX = $(LOCAL_PATH)/../../../build/libmpv/prefix/arm64
 endif
-# ifeq ($(TARGET_ARCH_ABI),x86_64)
-# PREFIX = $(PREFIX_X64)
-# endif
+ifeq ($(TARGET_ARCH_ABI),x86_64)
+PREFIX = $(LOCAL_PATH)/../../../build/libmpv/prefix/x86_64
+endif
 # ifeq ($(TARGET_ARCH_ABI),x86)
 # PREFIX = $(PREFIX_X86)
 # endif

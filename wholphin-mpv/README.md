@@ -15,8 +15,10 @@ export NDK_PATH=... # Such as ~/Library/Android/sdk/ndk/29.0.14206865
 # Build arm64
 PATH="$PATH:$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin" ./buildall.sh --clean --arch arm64 mpv
 # Build arm32
-PATH="$PATH:$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin" ./buildall.sh mpv
+PATH="$PATH:$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin" ./buildall.sh --arch armv7l mpv
+# Build x86_64
+PATH="$PATH:$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin" ./buildall.sh --arch x86_64 mpv
 
-cd ../.. # ie $PROJECT_ROOT/wholphin-mpv
+cd ../../.. # ie $PROJECT_ROOT
 ./gradlew build
 ```
