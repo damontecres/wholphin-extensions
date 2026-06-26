@@ -13,7 +13,7 @@ PROJECT_ROOT="$(realpath "${SCRIPT_DIR}/../")"
 
 # Config
 ANDROID_ABI=21
-ENABLED_DECODERS=(dca ac3 eac3 mlp truehd flac alac pcm_mulaw pcm_alaw mp3)
+ENABLED_DECODERS=(dca ac3 eac3 mlp truehd flac alac pcm_mulaw pcm_alaw mp3 aac)
 FFMPEG_BRANCH="release/6.0"
 DAV1D_BRANCH="1.5.3"
 
@@ -59,6 +59,11 @@ else
 fi
 
 [[ ! -d "${FFMPEG_MODULE_PATH}/jni/ffmpeg" ]] && ln -s "$FFMPEG_PATH" "${FFMPEG_MODULE_PATH}/jni/ffmpeg"
+
+# Apply custom source patches for AC3 transcoding support
+cp "$SCRIPT_DIR/custom_src/jni/build_ffmpeg.sh" "${FFMPEG_MODULE_PATH}/jni/build_ffmpeg.sh"
+cp "$SCRIPT_DIR/custom_src/jni/ffmpeg_jni.cc" "${FFMPEG_MODULE_PATH}/jni/ffmpeg_jni.cc"
+cp -r "$SCRIPT_DIR/custom_src/java/"* "${FFMPEG_MODULE_PATH}/java/"
 
 pushd "${FFMPEG_MODULE_PATH}/jni" || exit
 
