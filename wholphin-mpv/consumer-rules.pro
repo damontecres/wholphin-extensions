@@ -1,0 +1,1 @@
+-keep class com.github.damontecres.wholphin.mpv.MPVLib { *; }
