@@ -24,6 +24,7 @@ android {
             abiFilters += "arm64-v8a"
             abiFilters += "x86_64"
         }
+        consumerProguardFile("consumer-rules.pro")
     }
 
     buildTypes {
