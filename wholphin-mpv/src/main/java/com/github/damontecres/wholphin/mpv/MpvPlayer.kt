@@ -590,8 +590,8 @@ class MpvPlayer(
         sendCommand(MpvCommand.SEEK, positionMs)
     }
 
-    override fun onTrackSelectionsInvalidated() {
-        // no-op
+    override fun onTrackSelectionsInvalidated(parameters: TrackSelectionParameters?) {
+        parameters?.let(trackSelector::onParametersActivated)
     }
 
     override fun eventProperty(property: String) {
