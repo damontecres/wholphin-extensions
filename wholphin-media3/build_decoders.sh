@@ -46,6 +46,7 @@ if [[ -d media ]]; then
   pushd media || exit
   git fetch origin "$media_version" --depth 1
   git checkout --force FETCH_HEAD
+  popd
 else
   git clone https://github.com/androidx/media.git --depth 1 --single-branch -b "$media_version" media
 fi
@@ -54,9 +55,13 @@ if [[ -d ffmpeg ]]; then
   pushd ffmpeg || exit
   git fetch origin "$FFMPEG_BRANCH" --depth 1
   git checkout --force FETCH_HEAD
+  popd
 else
   git clone https://github.com/FFmpeg/FFmpeg --depth 1 --single-branch -b "$FFMPEG_BRANCH" ffmpeg
 fi
+
+# Patch media3's ffmpeg build script to remove old flag
+sed -i '/--disable-postproc/d' media/libraries/decoder_ffmpeg/src/main/jni/build_ffmpeg.sh
 
 [[ ! -d "${FFMPEG_MODULE_PATH}/jni/ffmpeg" ]] && ln -s "$FFMPEG_PATH" "${FFMPEG_MODULE_PATH}/jni/ffmpeg"
 
