@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+MODULES=(ffmpeg av1 flac opus)
+
 SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(dirname "${SCRIPT_PATH}")"
 PROJECT_ROOT="$(realpath "${SCRIPT_DIR}/../")"
@@ -12,22 +14,16 @@ media3_version="$(grep "androidx-media3 = " "$PROJECT_ROOT/gradle/libs.versions.
 version="$(git describe --tags --abbrev=0)"
 version=${version#v}
 
-version=$version artifactId=decoder-ffmpeg media3_version=$media3_version \
-  envsubst '${version} ${artifactId} ${media3_version}' < "${PROJECT_ROOT}/wholphin-media3/pom.template.xml" > "${PROJECT_ROOT}/wholphin-media3/ffmpeg.pom.xml"
+for module in "${MODULES[@]}"; do
+  version=$version artifactId="decoder-${module}" media3_version=$media3_version \
+    envsubst '${version} ${artifactId} ${media3_version}' < "${PROJECT_ROOT}/wholphin-media3/pom.template.xml" > "${PROJECT_ROOT}/wholphin-media3/${module}.pom.xml"
+done
 
-version=$version artifactId=decoder-av1 media3_version=$media3_version \
-  envsubst '${version} ${artifactId} ${media3_version}' < "${PROJECT_ROOT}/wholphin-media3/pom.template.xml" > "${PROJECT_ROOT}/wholphin-media3/av1.pom.xml"
-
-mvn deploy:deploy-file \
-  -s "$SETTINGS_FILE" \
-  -Durl="https://maven.pkg.github.com/damontecres/wholphin-extensions" \
-  -Dfile="$TARGET_PATH/lib-decoder-ffmpeg-release.aar" \
-  -DpomFile="${PROJECT_ROOT}/wholphin-media3/ffmpeg.pom.xml" \
-  -DrepositoryId=github
-
-mvn deploy:deploy-file \
-  -s "$SETTINGS_FILE" \
-  -Durl="https://maven.pkg.github.com/damontecres/wholphin-extensions" \
-  -Dfile="$TARGET_PATH/lib-decoder-av1-release.aar" \
-  -DpomFile="${PROJECT_ROOT}/wholphin-media3/av1.pom.xml" \
-  -DrepositoryId=github
+for module in "${MODULES[@]}"; do
+  mvn deploy:deploy-file \
+    -s "$SETTINGS_FILE" \
+    -Durl="https://maven.pkg.github.com/damontecres/wholphin-extensions" \
+    -Dfile="$TARGET_PATH/lib-decoder-${module}-release.aar" \
+    -DpomFile="${PROJECT_ROOT}/wholphin-media3/${module}.pom.xml" \
+    -DrepositoryId=github
+done
