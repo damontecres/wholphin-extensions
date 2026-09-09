@@ -13,9 +13,12 @@ PROJECT_ROOT="$(realpath "${SCRIPT_DIR}/../")"
 
 # Config
 ANDROID_ABI=21
-ENABLED_DECODERS=(dca ac3 eac3 mlp truehd flac alac pcm_mulaw pcm_alaw mp3)
+MODULES=(ffmpeg av1 flac opus)
+ENABLED_DECODERS=(dca ac3 eac3 mlp truehd alac pcm_mulaw pcm_alaw mp3)
 FFMPEG_BRANCH="n9.0"
 DAV1D_BRANCH="1.5.4"
+FLAC_BRANCH="master"
+OPUS_BRANCH="main"
 
 # Path configs
 DIR_PATH="$(pwd)"
@@ -24,6 +27,8 @@ MEDIA_PATH="$DIR_PATH/ffmpeg_decoder/media"
 FFMPEG_MODULE_PATH="$MEDIA_PATH/libraries/decoder_ffmpeg/src/main"
 FFMPEG_PATH="$DIR_PATH/ffmpeg_decoder/ffmpeg"
 AV1_MODULE_PATH="$MEDIA_PATH/libraries/decoder_av1/src/main"
+FLAC_MODULE_PATH="$MEDIA_PATH/libraries/decoder_flac/src/main"
+OPUS_MODULE_PATH="$MEDIA_PATH/libraries/decoder_opus/src/main"
 HOST="$(uname -s | tr '[:upper:]' '[:lower:]')"
 HOST_PLATFORM="$HOST-x86_64"
 
@@ -91,12 +96,40 @@ pushd "$AV1_MODULE_PATH/jni" || exit
 
 /usr/bin/env bash ./build_dav1d.sh "${AV1_MODULE_PATH}" "${NDK_PATH}" "${HOST_PLATFORM}"
 
+# flac module
+
+pushd "$FLAC_MODULE_PATH/jni" || exit
+
+if [[ -d libflac ]]; then
+  pushd libflac || exit
+  git fetch origin "$FLAC_BRANCH" --depth 1
+  git checkout --force FETCH_HEAD
+else
+  git clone https://github.com/xiph/flac.git --depth 1 --single-branch -b "$FLAC_BRANCH" libflac
+fi
+
+# opus module
+
+pushd "$OPUS_MODULE_PATH/jni" || exit
+
+if [[ -d libopus ]]; then
+  pushd libopus || exit
+  git fetch origin "$OPUS_BRANCH" --depth 1
+  git checkout --force FETCH_HEAD
+else
+  git clone https://github.com/xiph/opus.git --depth 1 --single-branch -b "$OPUS_BRANCH" libopus
+fi
+
+# Assemble aar files
 
 pushd "$MEDIA_PATH" || exit
-./gradlew :lib-decoder-ffmpeg:assemble :lib-decoder-av1:assemble
+pre=("${MODULES[@]/#/:lib-decoder-}")
+args=("${pre[@]/%/:assemble}")
+echo "${args[@]}"
+./gradlew "${args[@]}"
 popd || exit
 
-popd || exit
-cp "$MEDIA_PATH/libraries/decoder_ffmpeg/buildout/outputs/aar/lib-decoder-ffmpeg-release.aar" "$TARGET_PATH/"
-cp "$MEDIA_PATH/libraries/decoder_av1/buildout/outputs/aar/lib-decoder-av1-release.aar" "$TARGET_PATH/"
+for module in "${MODULES[@]}"; do
+  cp "$MEDIA_PATH/libraries/decoder_$module/buildout/outputs/aar/lib-decoder-$module-release.aar" "$TARGET_PATH/"
+done
 popd || exit
