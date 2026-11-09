@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep the library's own BuildConfig if it relies on reflection
+-keep class com.github.damontecres.wholphin.mpv.BuildConfig { *; }

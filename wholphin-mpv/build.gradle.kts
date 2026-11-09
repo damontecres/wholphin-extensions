@@ -7,6 +7,22 @@ plugins {
     id("maven-publish")
 }
 
+val versionShort: String =
+    providers
+        .exec { commandLine("git", "describe", "--tags", "--abbrev=0") }
+        .standardOutput.asText
+        .getOrElse("v0.0.0")
+        .trim()
+        .removePrefix("v")
+
+val versionLong: String =
+    providers
+        .exec { commandLine("git", "describe", "--tags", "--long") }
+        .standardOutput.asText
+        .getOrElse("v0.0.0")
+        .trim()
+        .removePrefix("v")
+
 android {
     namespace = "com.github.damontecres.wholphin.mpv"
     compileSdk {
@@ -25,6 +41,11 @@ android {
             abiFilters += "x86_64"
         }
         consumerProguardFile("consumer-rules.pro")
+        buildConfigField("String", "VERSION", "\"$versionLong\"")
+        buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
+    }
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -64,20 +85,12 @@ android {
     }
 }
 
-val gitDescribe: String =
-    providers
-        .exec { commandLine("git", "describe", "--tags", "--abbrev=0") }
-        .standardOutput.asText
-        .getOrElse("v0.0.0")
-        .trim()
-        .removePrefix("v")
-
 publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "com.github.damontecres.wholphin.mpv"
             artifactId = "wholphin-mpv"
-            version = gitDescribe
+            version = versionShort
 
             afterEvaluate {
                 from(components["release"])
