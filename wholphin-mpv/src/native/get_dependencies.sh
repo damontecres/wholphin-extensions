@@ -2,6 +2,21 @@
 
 set -exou pipefail
 
+v_lua=5.2.4
+v_unibreak=8.0
+v_harfbuzz=15.0.0
+v_fribidi=1.0.17
+v_freetype=VER-2-15-0
+v_mbedtls=3.6.7
+v_libxml2=2.15.4
+v_fontconfig=2.18.3
+v_curl=8.23.0
+v_dav1d=1.5.4
+v_libass=0.17.5
+v_libplacebo=7.387.0
+v_ffmpeg=n9.0
+v_mpv=0.42.0
+
 SCRIPT_PATH="$( dirname "${BASH_SOURCE[0]}" )"
 DEPS_PATH="../../$SCRIPT_PATH/build/libmpv/deps"
 mkdir -p "$DEPS_PATH"
@@ -25,47 +40,65 @@ function clone(){
   fi
 }
 
-clone "https://github.com/videolan/dav1d" "1.5.4" dav1d
+clone "https://github.com/videolan/dav1d" "${v_dav1d}" dav1d
 
-clone "https://github.com/FFmpeg/FFmpeg" "n9.0" ffmpeg
+clone "https://github.com/FFmpeg/FFmpeg" "${v_ffmpeg}" ffmpeg
 
-clone "https://gitlab.freedesktop.org/freetype/freetype.git" "VER-2-14-1" freetype2 --recurse-submodules
+clone "https://gitlab.freedesktop.org/freetype/freetype.git" "${v_freetype}" freetype2 --recurse-submodules
 
-clone "https://github.com/libass/libass" "0.17.5" libass
+clone "https://github.com/libass/libass" "${v_libass}" libass
 
-clone "https://github.com/haasn/libplacebo" "v7.360.1" libplacebo --recurse-submodules
+clone "https://github.com/haasn/libplacebo" "v${v_libplacebo}" libplacebo --recurse-submodules
 
-clone "https://github.com/mpv-player/mpv" "v0.41.0" mpv
+clone "https://github.com/mpv-player/mpv" "v${v_mpv}" mpv
+
 
 if [[ ! -d mbedtls ]]; then
 	mkdir mbedtls
-	wget https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.7/mbedtls-3.6.7.tar.bz2 -O - | \
+	wget https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${v_mbedtls}/mbedtls-${v_mbedtls}.tar.bz2 -O - | \
 		tar -xj -C mbedtls --strip-components=1
 fi
 
 if [[ ! -d fribidi ]]; then
 	mkdir fribidi
-	wget https://github.com/fribidi/fribidi/releases/download/v1.0.16/fribidi-1.0.16.tar.xz -O - | \
+	wget https://github.com/fribidi/fribidi/releases/download/v${v_fribidi}/fribidi-${v_fribidi}.tar.xz -O - | \
 		tar -xJ -C fribidi --strip-components=1
 fi
 
 if [[ ! -d harfbuzz ]]; then
 	mkdir harfbuzz
-	wget https://github.com/harfbuzz/harfbuzz/releases/download/14.2.1/harfbuzz-14.2.1.tar.xz -O - | \
+	wget https://github.com/harfbuzz/harfbuzz/releases/download/${v_harfbuzz}/harfbuzz-${v_harfbuzz}.tar.xz -O - | \
 		tar -xJ -C harfbuzz --strip-components=1
 fi
 
-version_unibreak="7.0"
 if [[ ! -d unibreak ]]; then
 	mkdir unibreak
-	wget https://github.com/adah1972/libunibreak/releases/download/libunibreak_${version_unibreak//./_}/libunibreak-${version_unibreak}.tar.gz -O - | \
+	wget https://github.com/adah1972/libunibreak/releases/download/libunibreak_${v_unibreak//./_}/libunibreak-${v_unibreak}.tar.gz -O - | \
 		tar -xz -C unibreak --strip-components=1
 fi
 
 if [[ ! -d lua ]]; then
 	mkdir lua
-	wget https://www.lua.org/ftp/lua-5.2.4.tar.gz -O - | \
+	wget https://www.lua.org/ftp/lua-${v_lua}.tar.gz -O - | \
 		tar -xz -C lua --strip-components=1
+fi
+
+if [ ! -d libxml2 ]; then
+	mkdir libxml2
+	wget https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${v_libxml2}/libxml2-v${v_libxml2}.tar.gz -O - | \
+		tar -xz -C libxml2 --strip-components=1
+fi
+
+if [ ! -d fontconfig ]; then
+	mkdir fontconfig
+	wget https://gitlab.freedesktop.org/fontconfig/fontconfig/-/archive/${v_fontconfig}/fontconfig-${v_fontconfig}.tar.gz -O - | \
+		tar -xz -C fontconfig --strip-components=1
+fi
+
+if [ ! -d curl ]; then
+	mkdir curl
+	wget https://curl.se/download/curl-$v_curl.tar.gz -O - | \
+		tar -xz -C curl --strip-components=1
 fi
 
 # python packages: jsonschema jinja2 meson
