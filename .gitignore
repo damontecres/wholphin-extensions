@@ -21,3 +21,4 @@ local.properties
 /wholphin-media3/libs/
 ffmpeg_decoder/
 *.pom.xml
+/local_scripts/

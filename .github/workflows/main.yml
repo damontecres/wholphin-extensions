@@ -56,9 +56,9 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          pip install jsonschema jinja2
+          pip install jsonschema jinja2 meson
           sudo apt update
-          sudo apt install -y build-essential autoconf pkg-config libtool ninja-build unzip wget meson nasm gettext
+          sudo apt install -y build-essential autoconf pkg-config libtool ninja-build unzip wget nasm gettext gperf
 
       # media3
       - name: Build media3 decoders

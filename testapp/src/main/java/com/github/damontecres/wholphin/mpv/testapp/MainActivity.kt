@@ -7,13 +7,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
@@ -32,16 +30,12 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -52,24 +46,30 @@ import androidx.media3.ui.compose.modifiers.resizeWithContentScale
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPresentationState
 import androidx.tv.material3.Button
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import androidx.tv.material3.surfaceColorAtElevation
 import com.github.damontecres.wholphin.mpv.MpvPlayer
+import com.github.damontecres.wholphin.mpv.MpvPlayerOptions
 import com.github.damontecres.wholphin.mpv.testapp.ui.theme.WholphinextensionsTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalTvMaterial3Api::class)
+    private val certsFile by lazy { File(this@MainActivity.filesDir, "certs.pem") }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycleScope.launch {
+            CertificateUtils.copySystemCerts(certsFile)
+        }
         // Can use launch flags: -e url <url>
         val url = intent.getStringExtra("url") ?: ""
         Timber.plant(Timber.DebugTree())
@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
                     var submit by remember { mutableStateOf(false) }
                     if (submit) {
                         val urls = remember(input) { input.lines() }
-                        Playback(urls, Modifier.fillMaxSize())
+                        Playback(urls, certsFile, Modifier.fillMaxSize())
                     } else {
                         InputUrls(
                             text = input,
@@ -127,10 +127,21 @@ fun InputUrls(
 @Composable
 fun Playback(
     urls: List<String>,
+    tlsCertFile: File,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val player = remember { MpvPlayer(context, false, false) }
+    val player =
+        remember {
+            MpvPlayer(
+                context,
+                MpvPlayerOptions(
+                    enableHardwareDecoding = false,
+                    useGpuNext = false,
+                    tlsCertFile = tlsCertFile,
+                ),
+            )
+        }
     val presentationState = rememberPresentationState(player, false)
     var playerSize by remember { mutableFloatStateOf(1f) }
     val focusRequester = remember { FocusRequester() }

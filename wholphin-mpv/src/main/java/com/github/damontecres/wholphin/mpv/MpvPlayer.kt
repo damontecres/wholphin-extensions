@@ -47,6 +47,8 @@ import com.github.damontecres.wholphin.mpv.MPVLib.MpvEvent.MPV_EVENT_PLAYBACK_RE
 import com.github.damontecres.wholphin.mpv.MPVLib.MpvEvent.MPV_EVENT_START_FILE
 import com.github.damontecres.wholphin.mpv.MPVLib.MpvEvent.MPV_EVENT_VIDEO_RECONFIG
 import timber.log.Timber
+import java.io.File
+import java.io.FileNotFoundException
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.update
@@ -63,13 +65,24 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(UnstableApi::class)
 class MpvPlayer(
     private val context: Context,
-    private val enableHardwareDecoding: Boolean,
-    private val useGpuNext: Boolean,
+    private val options: MpvPlayerOptions,
 ) : BasePlayer(),
     MPVLib.EventObserver,
     TrackSelector.InvalidationListener,
     Handler.Callback,
     SurfaceHolder.Callback {
+    init {
+        if (options.tlsCertFile != null) {
+            if (options.tlsCertFile.isFile()) {
+                if (!options.tlsCertFile.canRead()) {
+                    throw AccessDeniedException(options.tlsCertFile, reason = "File not readable")
+                }
+            } else {
+                throw FileNotFoundException("tlsCertFile not found: ${options.tlsCertFile.absolutePath}")
+            }
+        }
+    }
+
     companion object {
         private const val DEBUG = false
 
@@ -116,9 +129,9 @@ class MpvPlayer(
         MPVLib.setOptionString("config", "yes")
         MPVLib.setOptionString("config-dir", context.filesDir.path)
 
-        if (enableHardwareDecoding) {
+        if (options.enableHardwareDecoding) {
             MPVLib.setOptionString("hwdec", "mediacodec,mediacodec-copy")
-            MPVLib.setOptionString("vo", if (useGpuNext) "gpu-next" else "gpu")
+            MPVLib.setOptionString("vo", if (options.useGpuNext) "gpu-next" else "gpu")
         } else {
             MPVLib.setOptionString("hwdec", "no")
         }
@@ -129,6 +142,11 @@ class MpvPlayer(
         val cacheMegs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) 64 else 32
         MPVLib.setOptionString("demuxer-max-bytes", "${cacheMegs * 1024 * 1024}")
         MPVLib.setOptionString("demuxer-max-back-bytes", "${cacheMegs * 1024 * 1024}")
+
+        if (options.tlsCertFile != null) {
+            MPVLib.setOptionString("tls-verify", "yes")
+            MPVLib.setOptionString("tls-ca-file", options.tlsCertFile.absolutePath)
+        }
 
         Timber.v("Initializing MPVLib")
         MPVLib.init()
@@ -859,8 +877,8 @@ class MpvPlayer(
             MPVLib.command(arrayOf("loadfile", url, "replace", "-1"))
         }
 
-        if (enableHardwareDecoding) {
-            MPVLib.setOptionString("vo", if (useGpuNext) "gpu-next" else "gpu")
+        if (options.enableHardwareDecoding) {
+            MPVLib.setOptionString("vo", if (options.useGpuNext) "gpu-next" else "gpu")
         }
         Timber.d("Called loadfile")
     }
